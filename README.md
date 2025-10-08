@@ -30,6 +30,4 @@ Le projet est divisé en plusieurs modules VHDL :
 - FPGA: Xilinx Artix-7 (Nexys4)
 - IDE : Xilinx Vivado
 
-# Auteurs
--Lina Benlahsar
--Zayd Chamcham
+
