@@ -1,0 +1,26 @@
+name: GHDL tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install GHDL
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes ghdl make
+
+      - name: Compile and run self-checking testbenches
+        run: make test

@@ -1,0 +1,20 @@
+# GHDL
+work-obj*.cf
+build/
+*.ghw
+*.vcd
+
+# Vivado
+.Xil/
+*.jou
+*.log
+*.str
+*.pb
+*.wdb
+*.xpr
+*.cache/
+*.gen/
+*.hw/
+*.ip_user_files/
+*.runs/
+*.sim/
