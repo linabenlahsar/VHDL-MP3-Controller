@@ -1,55 +1,59 @@
-# FPGA MP3 Controller — VHDL
+# Simplified MP3 controller in VHDL
 
 [![GHDL tests](https://github.com/linabenlahsar/VHDL-MP3-Controller/actions/workflows/ghdl.yml/badge.svg)](https://github.com/linabenlahsar/VHDL-MP3-Controller/actions/workflows/ghdl.yml)
 
-A synthesizable VHDL control interface for a simplified MP3-player demonstrator targeting a Nexys4 / Xilinx Artix-7 FPGA.
+This was an academic FPGA project developed with **Zayd Chamcham** on a Nexys4 board. The goal was to design the control interface of a simplified music player: push-button commands, playback state, track selection, volume, and multiplexed seven-segment display.
 
-The design models the **control path**, not an MP3 audio decoder: push-button commands drive a finite-state machine, a track counter, a volume counter, and a multiplexed eight-digit seven-segment display.
+It is a control-path demonstrator, not an MP3 audio decoder.
 
-## Engineering highlights
+## Behaviour
 
-- synchronous finite-state machine with stopped, playing, and paused states
-- selectable forward/reverse track traversal over tracks 1–599
-- saturating volume control over levels 1–9
-- synchronized rising-edge detection for asynchronous push buttons
-- reusable clock-enable generator; no logic-generated secondary clocks
-- eight-digit multiplexed seven-segment display
-- self-checking GHDL regression tests in GitHub Actions
+- the centre button cycles through stop, play, and pause;
+- left and right select reverse or forward track traversal;
+- the track counter covers 1 to 599 and wraps at both limits;
+- volume ranges from 1 to 9 and saturates at the limits;
+- the display shows the track number, volume, direction, and player state.
 
-## Repository structure
+All sequential logic remains in the 100 MHz clock domain. Slower operations use one-cycle clock-enable pulses rather than fabric-generated clocks.
 
-- `src/` — synthesizable VHDL-2008 modules
-- `tb/` — self-checking testbenches
-- `docs/architecture.md` — behaviour and integration notes
-- `constraints/` — board-constraint guidance
-- `Makefile` — one-command local regression
-- `.github/workflows/ghdl.yml` — continuous integration
+## RTL organization
 
-## Run the tests
+| File | Role |
+|---|---|
+| `player_controller_fsm.vhd` | playback FSM and direction control |
+| `track_counter.vhd` | bidirectional track counter |
+| `volume_counter.vhd` | saturating volume counter |
+| `button_edge_detector.vhd` | input synchronization and edge detection |
+| `clock_enable.vhd` | reusable clock-enable divider |
+| `seven_segment_decoder.vhd` | decimal-to-seven-segment conversion |
+| `display_scanner.vhd` | eight-digit display multiplexing |
+| `mp3_controller_top.vhd` | top-level integration |
 
-GNU Make and GHDL are required.
+The synthesizable files are under `src/`; self-checking testbenches are under `tb/`.
+
+## Tests
+
+Install GHDL and GNU Make, then run:
 
 ```bash
 make test
 ```
 
-The regression checks the controller state transitions, direction changes, track wrap-around, restart behaviour, and volume saturation.
+The regression covers:
 
-## FPGA target
+- state transitions and direction changes;
+- forward and reverse wrap-around of the track counter;
+- track restart;
+- upper and lower volume saturation.
 
-The interface is written for a 100 MHz board clock and active-high push buttons. The default generics produce:
+The same tests run automatically on GitHub Actions.
 
-- an 8 kHz display-scan enable (1 kHz refresh per digit)
-- a 10 Hz track-step enable for the demonstrator
+## Board integration
 
-Board pin assignments are intentionally kept outside the RTL. Add the correct Nexys4 or Nexys4 DDR XDC file before implementation; the two boards do not have identical constraints.
+The default top-level generics assume a 100 MHz input clock. The XDC file is not included because Nexys4 and Nexys4 DDR pin assignments differ. The constraint file must match the exact board revision before Vivado implementation.
 
-## Scope and validation
-
-The RTL and testbenches compile and run with GHDL in CI. Hardware implementation still requires the board-specific XDC file and on-board timing/functional validation. No unsupported timing, area, or power claim is made here.
+The public repository validates compilation and simulated behaviour with GHDL; it does not claim post-implementation timing, area, power, or renewed on-board validation.
 
 ## Authors
 
-Original academic project: **Lina Benlahsar** and **Zayd Chamcham**.
-
-Portfolio refactoring, documentation, and automated verification preserve the original joint attribution.
+**Lina Benlahsar** and **Zayd Chamcham**.
